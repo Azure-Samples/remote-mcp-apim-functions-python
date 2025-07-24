@@ -23,6 +23,15 @@ param entraAppDisplayName string
 @description('The name of the MCP Server to display in the consent page')
 param mcpServerName string = 'MCP Server'
 
+@description('The CosmosDB account endpoint')
+param cosmosDbEndpoint string
+
+@description('The CosmosDB database name')
+param cosmosDbDatabaseName string
+
+@description('The CosmosDB container name for client registrations')
+param cosmosDbContainerName string
+
 resource apimService 'Microsoft.ApiManagement/service@2021-08-01' existing = {
   name: apimServiceName
 }
@@ -79,8 +88,15 @@ resource cryptoValuesScript 'Microsoft.Resources/deploymentScripts@2020-10-01' =
         name: 'RESOURCEGROUP_NAME'
         value: resourceGroup().name
       }
+      {
+        name: 'SUBSCRIPTION_ID'
+        value: subscription().subscriptionId
+      }
     ]
     scriptContent: '''
+      # Set subscription context
+      Set-AzContext -Subscription $env:SUBSCRIPTION_ID
+      
       # Generate random 32 bytes (256-bit) key for AES-256
       $key = New-Object byte[] 32
       $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
@@ -92,9 +108,12 @@ resource cryptoValuesScript 'Microsoft.Resources/deploymentScripts@2020-10-01' =
       $rng.GetBytes($iv)
       $ivBase64 = [Convert]::ToBase64String($iv)
       
+      # Create APIM context with subscription ID
+      $apimContext = New-AzApiManagementContext -ResourceGroupName $env:RESOURCEGROUP_NAME -ServiceName $env:APIM_NAME
+      
       # Set the values in APIM named values
-      New-AzApiManagementNamedValue -Context (New-AzApiManagementContext -ResourceGroupName $env:RESOURCEGROUP_NAME -ServiceName $env:APIM_NAME) -NamedValueId "EncryptionKey" -Name "EncryptionKey" -Value $keyBase64 -Secret
-      New-AzApiManagementNamedValue -Context (New-AzApiManagementContext -ResourceGroupName $env:RESOURCEGROUP_NAME -ServiceName $env:APIM_NAME) -NamedValueId "EncryptionIV" -Name "EncryptionIV" -Value $ivBase64 -Secret
+      New-AzApiManagementNamedValue -Context $apimContext -NamedValueId "EncryptionKey" -Name "EncryptionKey" -Value $keyBase64 -Secret
+      New-AzApiManagementNamedValue -Context $apimContext -NamedValueId "EncryptionIV" -Name "EncryptionIV" -Value $ivBase64 -Secret
     '''
   }
 }
@@ -177,6 +196,37 @@ resource MCPServerNamedValue 'Microsoft.ApiManagement/service/namedValues@2021-0
   properties: {
     displayName: 'MCPServerName'
     value: mcpServerName
+    secret: false
+  }
+}
+
+// CosmosDB Named Values
+resource CosmosDbEndpointNamedValue 'Microsoft.ApiManagement/service/namedValues@2021-08-01' = {
+  parent: apimService
+  name: 'CosmosDbEndpoint'
+  properties: {
+    displayName: 'CosmosDbEndpoint'
+    value: cosmosDbEndpoint
+    secret: false
+  }
+}
+
+resource CosmosDbDatabaseNamedValue 'Microsoft.ApiManagement/service/namedValues@2021-08-01' = {
+  parent: apimService
+  name: 'CosmosDbDatabase'
+  properties: {
+    displayName: 'CosmosDbDatabase'
+    value: cosmosDbDatabaseName
+    secret: false
+  }
+}
+
+resource CosmosDbContainerNamedValue 'Microsoft.ApiManagement/service/namedValues@2021-08-01' = {
+  parent: apimService
+  name: 'CosmosDbContainer'
+  properties: {
+    displayName: 'CosmosDbContainer'
+    value: cosmosDbContainerName
     secret: false
   }
 }
@@ -441,5 +491,4 @@ resource oauthConsentPostPolicy 'Microsoft.ApiManagement/service/apis/operations
     value: loadTextContent('consent.policy.xml')
   }
 }
-
 output apiId string = oauthApi.id
