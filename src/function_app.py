@@ -197,15 +197,33 @@ tool_properties_get_snippets_object = [ToolProperty(_SNIPPET_NAME_PROPERTY_NAME,
 tool_properties_save_snippets_json = json.dumps([prop.__dict__ for prop in tool_properties_save_snippets_object])
 tool_properties_get_snippets_json = json.dumps([prop.__dict__ for prop in tool_properties_get_snippets_object])
 
-
 @app.generic_trigger(
     arg_name="context",
     type="mcpToolTrigger",
     toolName="hello_mcp",
-    description="Hello world with JWT token validation.",
+    description="Hello world.",
     toolProperties="[]",
 )
 def hello_mcp(context) -> str:
+    """
+    A simple function that returns a greeting message.
+
+    Args:
+        context: The trigger context (not used in this function).
+
+    Returns:
+        str: A greeting message.
+    """
+    return "Hello I am MCPTool!"
+
+@app.generic_trigger(
+    arg_name="context",
+    type="mcpToolTrigger",
+    toolName="validate_token",
+    description="Performs JWT token validation.",
+    toolProperties="[]",
+)
+def validate_token(context) -> str:
     """
     A function that validates a JWT token and returns validation results.
 
