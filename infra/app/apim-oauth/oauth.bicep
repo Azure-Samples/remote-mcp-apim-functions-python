@@ -6,7 +6,7 @@ param location string
 
 // Parameters for Named Values
 @description('The required scopes for authorization')
-param oauthScopes string
+param oauthScope string
 
 @description('The principle id of the user-assigned managed identity for Entra app')
 param entraAppUserAssignedIdentityPrincipleId string
@@ -145,7 +145,7 @@ resource OAuthScopesNamedValue 'Microsoft.ApiManagement/service/namedValues@2021
   name: 'OAuthScopes'
   properties: {
     displayName: 'OAuthScopes'
-    value: oauthScopes
+    value: 'api://${entraApp.outputs.entraAppId}/${oauthScope}'
     secret: false
   }
 }
@@ -399,3 +399,4 @@ resource oauthConsentPostPolicy 'Microsoft.ApiManagement/service/apis/operations
 }
 
 output apiId string = oauthApi.id
+output entraAppId string = entraApp.outputs.entraAppId
