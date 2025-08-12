@@ -39,7 +39,6 @@ def validate_jwt_token(access_token: str, audience: Optional[str] = None, issuer
     """
     try:
         logging.info("Starting JWT token validation")
-        logging.info(access_token)
         # Decode the token header to get algorithm and key ID
         unverified_header = jwt.get_unverified_header(access_token)
         algorithm = unverified_header.get('alg', 'RS256')
