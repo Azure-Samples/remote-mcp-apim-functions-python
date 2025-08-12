@@ -31,7 +31,7 @@
             <value>application/x-www-form-urlencoded</value>
         </set-header>
         <set-body>@{
-            return $"client_id={context.Variables.GetValueOrDefault("clientId")}&grant_type=authorization_code&code={context.Variables.GetValueOrDefault("authCode")}&redirect_uri={context.Variables.GetValueOrDefault("redirectUri")}&scope=https://graph.microsoft.com/.default&code_verifier={context.Variables.GetValueOrDefault("codeVerifier")}&client_assertion_type={context.Variables.GetValueOrDefault("clientAssertionType")}&client_assertion={context.Variables.GetValueOrDefault("ficToken")}";
+            return $"client_id={context.Variables.GetValueOrDefault("clientId")}&grant_type=authorization_code&code={context.Variables.GetValueOrDefault("authCode")}&redirect_uri={context.Variables.GetValueOrDefault("redirectUri")}&scope=api://{context.Variables.GetValueOrDefault("clientId")}/access_as_user&code_verifier={context.Variables.GetValueOrDefault("codeVerifier")}&client_assertion_type={context.Variables.GetValueOrDefault("clientAssertionType")}&client_assertion={context.Variables.GetValueOrDefault("ficToken")}";
         }</set-body>
         <rewrite-uri template="/token" />
     </inbound>

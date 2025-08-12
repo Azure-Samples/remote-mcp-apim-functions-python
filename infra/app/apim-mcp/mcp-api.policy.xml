@@ -24,10 +24,10 @@
             
             return Encoding.UTF8.GetString(decryptedBytes);
         }" />
-        <cache-lookup-value key="@($"EntraToken-{context.Variables.GetValueOrDefault("decryptedSessionKey")}")" variable-name="accessToken" />
+        <cache-lookup-value key="@($"EntraToken-{context.Variables.GetValueOrDefault("decryptedSessionKey")}")" variable-name="token" />
         
         <choose>
-            <when condition="@(context.Variables.GetValueOrDefault("accessToken") == null)">
+            <when condition="@(context.Variables.GetValueOrDefault("token") == null)">
                 <return-response>
                     <set-status code="401" reason="Unauthorized" />
                     <set-header name="WWW-Authenticate" exists-action="override">
@@ -40,6 +40,52 @@
         <set-header name="x-functions-key" exists-action="override">
             <value>{{function-host-key}}</value>
         </set-header>
+
+        <!-- Modify request body to include the bearer token in the params section -->
+        <choose>
+            <when condition="@(context.Request.Body != null && context.Request.Body.As<JObject>(preserveContent: true) != null)">
+                <!-- If body exists and is valid JSON, add token to the params section -->
+                <set-body>@{
+                    var requestBody = context.Request.Body.As<JObject>(preserveContent: true);
+                    if (requestBody["params"] != null && requestBody["params"].Type == JTokenType.Object)
+                    {
+                        var paramsObj = (JObject)requestBody["params"];
+                        // Look for arguments section or create it if it doesn't exist
+                        if (paramsObj["arguments"] != null && paramsObj["arguments"].Type == JTokenType.Object)
+                        {
+                            // Add bearer token to the arguments section
+                            var argumentsObj = (JObject)paramsObj["arguments"];
+                            argumentsObj["bearerToken"] = (string)context.Variables.GetValueOrDefault("token");
+                        }
+                        else if (paramsObj["arguments"] == null)
+                        {
+                            // Create arguments section if it doesn't exist
+                            paramsObj["arguments"] = new JObject();
+                            ((JObject)paramsObj["arguments"])["bearerToken"] = (string)context.Variables.GetValueOrDefault("token");
+                        }
+                        else
+                        {
+                            // Fallback: add directly to params if arguments exists but is not an object
+                            paramsObj["bearerToken"] = (string)context.Variables.GetValueOrDefault("token");
+                        }
+                    }
+                    else
+                    {
+                        // If params section doesn't exist or isn't an object, just add to root as fallback
+                        requestBody["bearerToken"] = (string)context.Variables.GetValueOrDefault("token");
+                    }
+                    return requestBody.ToString();
+                }</set-body>
+            </when>
+            <otherwise>
+                <!-- If no body or not JSON, create a new JSON body with the token -->
+                <set-body>@{
+                    var newBody = new JObject();
+                    newBody["bearerToken"] = (string)context.Variables.GetValueOrDefault("bearer");
+                    return newBody.ToString();
+                }</set-body>
+            </otherwise>
+        </choose>        
     </inbound>
     <backend>
         <base />

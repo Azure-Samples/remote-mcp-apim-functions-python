@@ -21,6 +21,20 @@ var issuer = '${loginEndpoint}${tenantId}/v2.0'
 resource entraApp 'Microsoft.Graph/applications@v1.0' = {
   displayName: entraAppDisplayName
   uniqueName: entraAppUniqueName
+  api: {
+    oauth2PermissionScopes: [
+      {
+        id: guid(entraAppUniqueName, 'access_as_user') // Generates a deterministic GUID
+        adminConsentDescription: 'Allow the application to access resources on behalf of the signed-in user.'
+        adminConsentDisplayName: 'Access resources on behalf of signed-in user'
+        isEnabled: true
+        type: 'User'
+        userConsentDescription: 'Allow the application to access resources on your behalf.'
+        userConsentDisplayName: 'Access resources on your behalf'
+        value: 'access_as_user'
+      }
+    ]
+  }
   web: {
     redirectUris: [
       apimOauthCallback
@@ -47,6 +61,19 @@ resource entraApp 'Microsoft.Graph/applications@v1.0' = {
     issuer: issuer
     subject: userAssignedIdentityPrincipleId
   }
+}
+
+// Update the application with its own appId in the identifier URI
+resource entraResourceAppUpdate 'Microsoft.Graph/applications@v1.0' = {
+  identifierUris: [
+    'api://${entraApp.appId}'
+  ]
+  // Keep all other properties the same as the original resource
+  displayName: entraAppDisplayName
+  uniqueName: entraAppUniqueName
+  api: entraApp.api
+  web: entraApp.web
+  requiredResourceAccess: entraApp.requiredResourceAccess
 }
 
 // Outputs

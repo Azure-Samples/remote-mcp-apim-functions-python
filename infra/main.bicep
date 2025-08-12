@@ -30,7 +30,7 @@ param disableLocalAuth bool = true
 
 // MCP Client APIM gateway specific variables
 
-var oauth_scopes = 'openid https://graph.microsoft.com/.default'
+var oauth_scope = 'access_as_user'
 
 
 var abbrs = loadJsonContent('./abbreviations.json')
@@ -68,7 +68,7 @@ module oauthAPIModule './app/apim-oauth/oauth.bicep' = {
     entraAppUniqueName: !empty(mcpEntraApplicationUniqueName) ? mcpEntraApplicationUniqueName : 'mcp-oauth-${abbrs.applications}${apimResourceToken}'
     entraAppDisplayName: !empty(mcpEntraApplicationDisplayName) ? mcpEntraApplicationDisplayName : 'MCP-OAuth-${abbrs.applications}${apimResourceToken}'
     apimServiceName: apimService.name
-    oauthScopes: oauth_scopes
+    oauthScope: oauth_scope
     entraAppUserAssignedIdentityPrincipleId: apimService.outputs.entraAppUserAssignedIdentityPrincipleId
     entraAppUserAssignedIdentityClientId: apimService.outputs.entraAppUserAssignedIdentityClientId
   }
