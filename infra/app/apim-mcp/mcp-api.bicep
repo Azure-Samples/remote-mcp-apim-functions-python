@@ -78,5 +78,17 @@ resource mcpMessageOperation 'Microsoft.ApiManagement/service/apis/operations@20
   }
 }
 
+// Create a test endpoint for debugging
+resource mcpTestMessageOperation 'Microsoft.ApiManagement/service/apis/operations@2023-05-01-preview' = {
+  parent: mcpApi
+  name: 'mcp-test-message'
+  properties: {
+    displayName: 'MCP Test Message Endpoint'
+    method: 'POST'
+    urlTemplate: '/test-message'
+    description: 'Test endpoint for debugging the message flow'
+  }
+}
+
 // Output the API ID for reference
 output apiId string = mcpApi.id

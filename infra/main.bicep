@@ -58,6 +58,27 @@ module apimService './core/apim/apim.bicep' = {
     apiManagementName: apiManagementName
   }
 }
+var cosmosDbName = '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
+// CosmosDB for OAuth client registrations
+module cosmosDb './core/database/cosmosdb.bicep' = {
+  name: 'cosmosdb'
+  scope: rg
+  params: {
+    cosmosDbAccountName: cosmosDbName
+    location: location
+    tags: tags
+  }
+}
+
+// Grant APIM system-assigned managed identity access to CosmosDB
+module apimCosmosDbRoleAssignment './core/database/cosmosdb-rbac.bicep' = {
+  name: 'apimCosmosDbRoleAssignment'
+  scope: rg
+  params: {
+    cosmosDbAccountName: cosmosDb.outputs.cosmosDbAccountName
+    principalId: apimService.outputs.principalId
+  }
+}
 
 // MCP client oauth via APIM gateway
 module oauthAPIModule './app/apim-oauth/oauth.bicep' = {
@@ -71,7 +92,13 @@ module oauthAPIModule './app/apim-oauth/oauth.bicep' = {
     oauthScopes: oauth_scopes
     entraAppUserAssignedIdentityPrincipleId: apimService.outputs.entraAppUserAssignedIdentityPrincipleId
     entraAppUserAssignedIdentityClientId: apimService.outputs.entraAppUserAssignedIdentityClientId
+     cosmosDbEndpoint: cosmosDb.outputs.cosmosDbEndpoint
+    cosmosDbDatabaseName: cosmosDb.outputs.databaseName
+    cosmosDbContainerName: cosmosDb.outputs.containerName
   }
+  dependsOn: [
+    apimCosmosDbRoleAssignment
+  ]
 }
 
 // MCP server API endpoints
