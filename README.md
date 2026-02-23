@@ -46,11 +46,11 @@ This is a [sequence diagram](infra/app/apim-oauth/diagrams/diagrams.md) to under
     ```
 
 1. CTRL click to load the MCP Inspector web app from the URL displayed by the app (e.g. http://127.0.0.1:6274/#resources)
-1. Set the transport type to `SSE`
-1. Set the URL to your running API Management SSE endpoint displayed after `azd up` and **Connect**:
+1. Set the transport type to `Streamable HTTP`
+1. Set the URL to your running API Management MCP endpoint displayed after `azd up` and **Connect**:
 
     ```shell
-    https://<apim-servicename-from-azd-output>.azure-api.net/mcp/sse
+    https://<apim-servicename-from-azd-output>.azure-api.net/mcp
     ```
 
 5. **List Tools**.  Click on a tool and **Run Tool**.  
@@ -177,12 +177,16 @@ This API provides the actual MCP protocol endpoints with security enforcement:
 
 #### Endpoints and Operations
 
-**Server-Sent Events Endpoint** (`GET /sse`)
-- **Purpose**: Establishes real-time communication channel for MCP protocol
+**Streamable HTTP Endpoint** (`POST /mcp`)
+- **Purpose**: Handles MCP JSON-RPC requests via Streamable HTTP transport
 - **Security**: Requires valid encrypted session token
 
-**Message Endpoint** (`POST /message`)
-- **Purpose**: Handles MCP protocol messages and tool invocations
+**Streamable HTTP GET Endpoint** (`GET /mcp`)
+- **Purpose**: Opens an optional SSE stream for server-initiated notifications
+- **Security**: Requires valid encrypted session token
+
+**Streamable HTTP DELETE Endpoint** (`DELETE /mcp`)
+- **Purpose**: Terminates an active MCP session
 - **Security**: Requires valid encrypted session token
 
 #### Security Policy Implementation

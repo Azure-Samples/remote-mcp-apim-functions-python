@@ -31,7 +31,7 @@ resource mcpApi 'Microsoft.ApiManagement/service/apis@2023-05-01-preview' = {
   name: 'mcp'
   properties: {
     displayName: 'MCP API'
-    description: 'Model Context Protocol API endpoints'
+    description: 'Model Context Protocol API endpoints (Streamable HTTP)'
     subscriptionRequired: false
     path: 'mcp'
     protocols: [
@@ -54,39 +54,39 @@ resource mcpApiPolicy 'Microsoft.ApiManagement/service/apis/policies@2023-05-01-
   }
 }
 
-// Create the SSE endpoint operation
-resource mcpSseOperation 'Microsoft.ApiManagement/service/apis/operations@2023-05-01-preview' = {
+// Streamable HTTP POST endpoint - handles MCP JSON-RPC requests
+resource mcpHttpPostOperation 'Microsoft.ApiManagement/service/apis/operations@2023-05-01-preview' = {
   parent: mcpApi
-  name: 'mcp-sse'
+  name: 'mcp-http-post'
   properties: {
-    displayName: 'MCP SSE Endpoint'
+    displayName: 'MCP Streamable HTTP POST'
+    method: 'POST'
+    urlTemplate: '/'
+    description: 'Streamable HTTP endpoint for MCP JSON-RPC requests'
+  }
+}
+
+// Streamable HTTP GET endpoint - optional session-based SSE stream
+resource mcpHttpGetOperation 'Microsoft.ApiManagement/service/apis/operations@2023-05-01-preview' = {
+  parent: mcpApi
+  name: 'mcp-http-get'
+  properties: {
+    displayName: 'MCP Streamable HTTP GET'
     method: 'GET'
-    urlTemplate: '/sse'
-    description: 'Server-Sent Events endpoint for MCP Server'
+    urlTemplate: '/'
+    description: 'Streamable HTTP endpoint for opening an SSE stream'
   }
 }
 
-// Create the message endpoint operation
-resource mcpMessageOperation 'Microsoft.ApiManagement/service/apis/operations@2023-05-01-preview' = {
+// Streamable HTTP DELETE endpoint - session termination
+resource mcpHttpDeleteOperation 'Microsoft.ApiManagement/service/apis/operations@2023-05-01-preview' = {
   parent: mcpApi
-  name: 'mcp-message'
+  name: 'mcp-http-delete'
   properties: {
-    displayName: 'MCP Message Endpoint'
-    method: 'POST'
-    urlTemplate: '/message'
-    description: 'Message endpoint for MCP Server'
-  }
-}
-
-// Create a test endpoint for debugging
-resource mcpTestMessageOperation 'Microsoft.ApiManagement/service/apis/operations@2023-05-01-preview' = {
-  parent: mcpApi
-  name: 'mcp-test-message'
-  properties: {
-    displayName: 'MCP Test Message Endpoint'
-    method: 'POST'
-    urlTemplate: '/test-message'
-    description: 'Test endpoint for debugging the message flow'
+    displayName: 'MCP Streamable HTTP DELETE'
+    method: 'DELETE'
+    urlTemplate: '/'
+    description: 'Streamable HTTP endpoint for session termination'
   }
 }
 
