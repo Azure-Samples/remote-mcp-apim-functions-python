@@ -28,7 +28,7 @@ param tags object = {}
 // ------------------
 
 // Create Cosmos DB account
-resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
+resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = {
   name: cosmosDbAccountName
   location: location
   tags: tags
@@ -57,7 +57,7 @@ resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
 }
 
 // Create database
-resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-04-15' = {
+resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2024-11-15' = {
   parent: cosmosDbAccount
   name: databaseName
   properties: {
@@ -68,7 +68,7 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-04-15
 }
 
 // Create container for client registrations
-resource clientRegistrationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = {
+resource clientRegistrationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-11-15' = {
   parent: database
   name: containerName
   properties: {
