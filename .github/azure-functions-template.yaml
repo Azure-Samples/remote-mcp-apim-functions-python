@@ -1,0 +1,10 @@
+# This descriptor drives template package creation in the packaging pipeline.
+schemaVersion: 1
+identity: Azure.Functions.Templates.RemoteMcpApimPython
+description: Create a Python Azure Functions app for Remote MCP Server with API Management, with deployment files for azd.
+projects:
+- name: Azure Functions Remote MCP Server with API Management (Python)
+  shortName: mcp-server-apim-python
+  root: .
+  stack: python
+  language: Python
