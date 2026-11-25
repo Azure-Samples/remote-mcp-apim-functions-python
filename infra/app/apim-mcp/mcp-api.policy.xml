@@ -1,7 +1,8 @@
 <!--
     MCP API POLICY
-    This policy applies to all operations in the MCP API.
-    It adds authorization header check for security.
+    This policy applies to all operations in the MCP API (Streamable HTTP).
+    It adds authorization header check for security and ensures streaming responses
+    are forwarded without buffering.
 -->
 <policies>
     <inbound>
@@ -42,7 +43,9 @@
         </set-header>
     </inbound>
     <backend>
-        <base />
+        <!-- Disable response buffering so SSE streams from Streamable HTTP are forwarded in real-time.
+             Timeout set to 240s to accommodate long-lived streaming responses. -->
+        <forward-request timeout="240" buffer-response="false" />
     </backend>
     <outbound>
         <base />

@@ -18,13 +18,13 @@ param principalId string
 // ------------------
 
 // Reference existing Cosmos DB account
-resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' existing = {
+resource cosmosDbAccount 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' existing = {
   name: cosmosDbAccountName
 }
 
 // Grant Cosmos DB Built-in Data Contributor role
 // Role definition ID: 00000000-0000-0000-0000-000000000002
-resource cosmosDbRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-04-15' = {
+resource cosmosDbRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-11-15' = {
   name: guid(cosmosDbAccount.id, principalId, 'Cosmos DB Built-in Data Contributor')
   parent: cosmosDbAccount
   properties: {
